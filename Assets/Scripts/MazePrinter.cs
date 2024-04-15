@@ -5,16 +5,18 @@ using UnityEngine;
 public class MazePrinter<T>: IMazePrinter<T> where T: Object
 {
     private readonly T wallPrefab;
+    private readonly T polePrefab;
     private readonly GameObject parent;
     private int drawColumn;
     private Vector3 startPosition;
 
     private IList<T> allBricks;
 
-    public MazePrinter(T wallPrefab, GameObject parent)
+    public MazePrinter(T wallPrefab, T polePrefab, GameObject parent)
     {
         this.allBricks = new List<T>();
         this.wallPrefab = wallPrefab;
+        this.polePrefab = polePrefab;
         this.parent = parent;
     }
     
@@ -34,89 +36,97 @@ public class MazePrinter<T>: IMazePrinter<T> where T: Object
         var width = cells.GetLength(0);
         var height = cells.GetLength(1);
         
-        this.DrawHorizontalWall(cells, 0.5f);
-        this.DrawHorizontalWall(cells, 100f);
-        this.DrawVerticalWall(cells, 93.5f);
-        this.DrawVerticalWall(cells, -9f);
-        
         for (int row = 0; row < height; row++)
         {
              for (int column = 0; column < width; column++)
              {
-                 DrawVerticalSegment(cells, column, row, 1.25f);
-                 DrawHorizontalSegment(cells, column, row, -10f);
+                 DrawCell(cells[column, row], column, row);
              }
         }
     }
-    
-    private void DrawVerticalSegment(Cell<T>[,] cells, int column, int row, float offsetX)
-    {
-        float width = 10.25f;
-        float offsetZ = 9.96f;
 
-        if (column < cells.GetLength(0) - 1)
-        {
-            if (!cells[column, row].LinkedCells.Contains(cells[column, row].EasternNeighbour))
-            {
-                var segment = Object.Instantiate(this.wallPrefab, new Vector3(
-                    this.startPosition.x + offsetX + width * column,
-                    this.startPosition.y,
-                    this.startPosition.z - offsetZ * row), Quaternion.identity, parent.transform);
-            
-                this.allBricks.Add(segment);
-            }
-        }
-    }
-    
-    private void DrawHorizontalSegment(Cell<T>[,] cells, int column, int row, float offsetZ)
+    private void DrawCell(Cell<T> cell, int column, int row)
     {
-        float height = 10f;
-        float offsetX = 10f;
+        var tileLength = 10f;
+        var pivotOffset = 0.5f;
+        
+        var topPole = Object.Instantiate(this.polePrefab, new Vector3(
+            this.startPosition.x + tileLength * column + column + pivotOffset,
+            this.startPosition.y,
+            this.startPosition.z - tileLength * row - row), Quaternion.identity, parent.transform);
 
-        if (row < cells.GetLength(1) - 1)
-        {
-            if (!cells[column, row].LinkedCells.Contains(cells[column, row].SouthernNeighbour))
-            {
-                var segment = Object.Instantiate(this.wallPrefab, new Vector3(
-                    this.startPosition.x + offsetX * column,
-                    this.startPosition.y,
-                    this.startPosition.z + offsetZ - height * row), Quaternion.Euler(0,90,0), parent.transform);  
-            
-                this.allBricks.Add(segment);
-            }   
-        }
-    }
-    
-    private void DrawHorizontalWall(Cell<T>[,] cells, float offsetZ)
-    {
-        float offset = 10f;
-        var width = cells.GetLength(0);
+        topPole.name = $"TopPole_{column}_{row}";
         
-        for (int column = 0; column < width; column++)
+        this.allBricks.Add(topPole);
+
+        // I am a eastern wall cell
+        if (cell.EasternNeighbour == default)
         {
-            var segment = Object.Instantiate(this.wallPrefab, new Vector3(
-                this.startPosition.x + offset * column,
+            var topEasternPole = Object.Instantiate(this.polePrefab, new Vector3(
+                this.startPosition.x + tileLength * (column + 1) + column + pivotOffset,
                 this.startPosition.y,
-                this.startPosition.z - offsetZ), Quaternion.Euler(0,90,0), parent.transform);
+                this.startPosition.z - tileLength * row - row), Quaternion.identity, parent.transform);
             
-            this.allBricks.Add(segment);
-        }
-    }
-    
-    private void DrawVerticalWall(Cell<T>[,] cells, float offsetX)
-    {
-        float offsetZ = 10f;
-        
-        var width = cells.GetLength(0);
-        
-        for (int column = 0; column < width; column++)
-        {
-            var segment = Object.Instantiate(this.wallPrefab, new Vector3(
-                this.startPosition.x + offsetX,
+            topEasternPole.name = $"TopPole_{column}_{row}";
+            
+            this.allBricks.Add(topEasternPole);
+            
+            var eastWallSegment = Object.Instantiate(this.wallPrefab, new Vector3(
+                this.startPosition.x + tileLength * (column + 1) + column + pivotOffset,
                 this.startPosition.y,
-                this.startPosition.z - offsetZ * column), Quaternion.identity, parent.transform);
+                this.startPosition.z - tileLength * row - row -  pivotOffset), Quaternion.Euler(0,90,0), parent.transform); 
             
-            this.allBricks.Add(segment);
+            eastWallSegment.name = $"EastWallSegment{column}_{row}";
+            
+            this.allBricks.Add(eastWallSegment);
+        }
+        
+        // I am a southern wall cell
+        if (cell.SouthernNeighbour == default)
+        {
+            var southernPole = Object.Instantiate(this.polePrefab, new Vector3(
+                this.startPosition.x + tileLength * column + column + pivotOffset,
+                this.startPosition.y,
+                this.startPosition.z - tileLength * (row + 1) - row), Quaternion.identity, parent.transform);
+            
+            southernPole.name = $"SouthernPole{column}_{row}";
+            
+            this.allBricks.Add(southernPole);
+            
+            var southernWallSegment = Object.Instantiate(this.wallPrefab, new Vector3(
+                this.startPosition.x + tileLength * column + column + 1,
+                this.startPosition.y,
+                this.startPosition.z - tileLength * (row + 1) - row), Quaternion.identity, parent.transform);
+            
+            southernWallSegment.name = $"SouthernWallSegment{column}_{row}";
+            
+            this.allBricks.Add(southernWallSegment);
+        }
+        
+        // I am a western wall cell or I have a western linked neighbour.
+        if (cell.WesternNeighbour == default || !cell.LinkedCells.Contains(cell.WesternNeighbour))
+        {
+            var westWallSegment = Object.Instantiate(this.wallPrefab, new Vector3(
+                this.startPosition.x + tileLength * column + column + pivotOffset,
+                this.startPosition.y,
+                this.startPosition.z - tileLength * row - row - pivotOffset), Quaternion.Euler(0,90,0), parent.transform);
+            
+            westWallSegment.name = $"WestWallSegment{column}_{row}";
+            
+            this.allBricks.Add(westWallSegment);
+        }
+        
+        // I am a northern wall cell or I have a northern linked neighbour.
+        if (cell.NothernNeighbour == default || !cell.LinkedCells.Contains(cell.NothernNeighbour))
+        {
+            var northWallSegment = Object.Instantiate(this.wallPrefab, new Vector3(
+                this.startPosition.x + tileLength * column + column + 1,
+                this.startPosition.y,
+                this.startPosition.z - tileLength * row - row), Quaternion.identity, parent.transform);
+            
+            northWallSegment.name = $"NorthWallSegment{column}_{row}";
+            
+            this.allBricks.Add(northWallSegment);
         }
     }
     
