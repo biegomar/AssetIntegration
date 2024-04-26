@@ -58,9 +58,19 @@ public class MazeController : MonoBehaviour
     {
         this.maze.Draw(new MazeVector(Convert.ToInt32(startPoint.x), Convert.ToInt32(startPoint.y),Convert.ToInt32(startPoint.z)));
         
-        //this.maze.DrawItemAtPosition(new MazeVector(0,0,0), enemy);
-        //this.maze.DrawItemAtPosition(new MazeVector(5,5,0), enemy);
-        //this.maze.DrawItemAtPosition(new MazeVector(9,1,0), enemy);
+        this.maze.DrawItemAtPosition(new MazeVector(0,0,0), enemy);
+        this.maze.DrawItemAtPosition(new MazeVector(2,2,0), enemy);
+        this.maze.DrawItemAtPosition(new MazeVector(4,4,0), enemy);
+        this.maze.DrawItemAtPosition(new MazeVector(6,6,0), enemy);
+        this.maze.DrawItemAtPosition(new MazeVector(8,8,0), enemy);
+        this.maze.DrawItemAtPosition(new MazeVector(10,10,0), enemy);
+        this.maze.DrawItemAtPosition(new MazeVector(12,12,0), enemy);
+        //this.maze.DrawItemAtPosition(new MazeVector(14,14,0), enemy);
+        //this.maze.DrawItemAtPosition(new MazeVector(16,16,0), enemy);
+        //this.maze.DrawItemAtPosition(new MazeVector(18,18,0), enemy);
+        //this.maze.DrawItemAtPosition(new MazeVector(19,19,0), enemy);
+        this.maze.DrawItemAtPosition(new MazeVector(5,5,0), enemy);
+        this.maze.DrawItemAtPosition(new MazeVector(9,1,0), enemy);
         
         mesh.BuildNavMesh();
         

@@ -142,15 +142,16 @@ public class MazePrinter<T>: IMazePrinter<T> where T: Object
 
     public void DrawItemAtPosition(Cell<T>[,] cells, MazeVector position, T item)
     {
-        float transX = -5f;
-        float transZ = -4f;
-        float offsetX = 10.25f;
-        float offsetZ = 10f;
-        
-        Object.Instantiate(item, new Vector3(
-            this.startPosition.x + transX + offsetX * position.X,
+        var tileLength = 10f;
+        var xOffset = 5f;
+        var yOffset = 5f;
+
+        var newPosition = new Vector3(
+            this.startPosition.x + tileLength * position.X + position.X + xOffset,
             this.startPosition.y,
-            this.startPosition.z + transZ - offsetZ * position.Y), Quaternion.identity);
+            this.startPosition.z - tileLength * position.Y - position.Y - yOffset);
+        
+         var enemy = Object.Instantiate(item, newPosition, Quaternion.identity, parent.transform);
     }
 
     public IList<T> Items { get; set; }
